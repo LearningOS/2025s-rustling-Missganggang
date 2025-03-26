@@ -1,48 +1,74 @@
 /*
-	graph
-	This problem requires you to implement a basic graph functio
+    graph
+    This problem requires you to implement a basic graph functio
 */
-// I AM NOT DONE
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
+
 #[derive(Debug, Clone)]
 pub struct NodeNotInGraph;
+
 impl fmt::Display for NodeNotInGraph {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "accessing a node that is not in the graph")
     }
 }
+
 pub struct UndirectedGraph {
     adjacency_table: HashMap<String, Vec<(String, i32)>>,
 }
+
 impl Graph for UndirectedGraph {
     fn new() -> UndirectedGraph {
         UndirectedGraph {
             adjacency_table: HashMap::new(),
         }
     }
+
     fn adjacency_table_mutable(&mut self) -> &mut HashMap<String, Vec<(String, i32)>> {
         &mut self.adjacency_table
     }
+
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>> {
         &self.adjacency_table
     }
+
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
+        let (from, to, weight) = edge;
+        let from_str = from.to_string();
+        let to_str = to.to_string();
+
+        // Add edge from 'from' to 'to'
+        self.adjacency_table
+            .entry(from_str.clone())
+            .or_insert(Vec::new())
+            .push((to_str.clone(), weight));
+
+        // Add edge from 'to' to 'from' since it's an undirected graph
+        self.adjacency_table
+            .entry(to_str)
+            .or_insert(Vec::new())
+            .push((from_str, weight));
+    }
+
+    fn add_node(&mut self, node: &str) -> bool {
+        let node_str = node.to_string();
+        if self.contains(node) {
+            false
+        } else {
+            self.adjacency_table.insert(node_str, Vec::new());
+            true
+        }
     }
 }
+
 pub trait Graph {
     fn new() -> Self;
     fn adjacency_table_mutable(&mut self) -> &mut HashMap<String, Vec<(String, i32)>>;
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
-    fn add_node(&mut self, node: &str) -> bool {
-        //TODO
-		true
-    }
-    fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
-    }
+    fn add_node(&mut self, node: &str) -> bool;
+    fn add_edge(&mut self, edge: (&str, &str, i32));
     fn contains(&self, node: &str) -> bool {
         self.adjacency_table().get(node).is_some()
     }
@@ -59,16 +85,19 @@ pub trait Graph {
         edges
     }
 }
+
 #[cfg(test)]
 mod test_undirected_graph {
     use super::Graph;
     use super::UndirectedGraph;
+
     #[test]
     fn test_add_edge() {
         let mut graph = UndirectedGraph::new();
         graph.add_edge(("a", "b", 5));
         graph.add_edge(("b", "c", 10));
         graph.add_edge(("c", "a", 7));
+
         let expected_edges = [
             (&String::from("a"), &String::from("b"), 5),
             (&String::from("b"), &String::from("a"), 5),
@@ -77,8 +106,16 @@ mod test_undirected_graph {
             (&String::from("b"), &String::from("c"), 10),
             (&String::from("c"), &String::from("b"), 10),
         ];
+
         for edge in expected_edges.iter() {
             assert_eq!(graph.edges().contains(edge), true);
         }
+    }
+
+    #[test]
+    fn test_add_node() {
+        let mut graph = UndirectedGraph::new();
+        assert_eq!(graph.add_node("a"), true);
+        assert_eq!(graph.add_node("a"), false);
     }
 }

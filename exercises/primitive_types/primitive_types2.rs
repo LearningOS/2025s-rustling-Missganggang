@@ -13,6 +13,8 @@ fn main() {
     // Note the _single_ quotes, these are different from the double quotes
     // you've been seeing around.
     let my_first_initial = 'C';
+    // is_alphabetic() 是用于检查字符是否为字母的方法
+    // is_numeric() 用于判断一个字符是否属于数字的一般类别
     if my_first_initial.is_alphabetic() {
         println!("Alphabetical!");
     } else if my_first_initial.is_numeric() {
